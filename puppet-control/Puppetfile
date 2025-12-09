@@ -1,0 +1,15 @@
+
+forge "https://forgeapi.puppet.com"
+
+# Core Modules
+mod 'puppetlabs/stdlib'
+mod 'puppetlabs/concat'
+mod 'puppetlabs/apt'
+mod 'puppetlabs/firewall'
+
+# Cassandra Module
+mod 'voxpupuli/cassandra', '2.10.0'
+
+# OS Tuning
+mod 'herculesteam/augeasproviders_sysctl'
+mod 'saz/limits'

@@ -1,0 +1,20 @@
+---
+version: 5
+defaults:
+  datadir: data
+  data_hash: yaml_data
+
+hierarchy:
+  - name: "Per-node data"
+    path: "nodes/%{::trusted.certname}.yaml"
+  
+  - name: "Per-cluster data"
+    # We rely on an EC2 tag or fact 'cluster' to identify which config to load
+    # In bootstrap, we can set FACTER_cluster=...
+    path: "clusters/%{::cluster}.yaml"
+
+  - name: "Per-OS defaults"
+    path: "os/%{::os.family}.yaml"
+
+  - name: "Common defaults"
+    path: "common.yaml"
