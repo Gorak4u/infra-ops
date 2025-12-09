@@ -1,13 +1,12 @@
 
 variable "region" {
-  description = "Region to deploy"
+  description = "Region to deploy resources"
+  type        = string
   default     = "us-east-1"
 }
 
-variable "cluster_name" {
-  default = "prod"
-}
-
-variable "node_count" {
-  default = 3
+variable "environment" {
+  description = "Deployment Environment"
+  type        = string
+  default     = "Production"
 }

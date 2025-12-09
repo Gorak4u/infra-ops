@@ -1,12 +1,17 @@
 
+# ------------------------------------------------------------------
 # Puppet Manifest for prod
-# Using voxpupuli/puppet-cassandra structure
+# Role: Cassandra Database Node
+# ------------------------------------------------------------------
 
 node default {
   include stdlib
   include java
 
-  # Configure Cassandra
+  # 1. System Limits & Sysctl (Double check via Puppet)
+  sysctl { 'vm.max_map_count': value => '1048575' }
+  
+  # 2. Install & Configure Cassandra
   class { 'cassandra':
     cluster_name      => 'prod',
     version           => '4.1.3',
@@ -15,16 +20,25 @@ node default {
     rpc_interface     => 'eth0',
     seeds             => [],
     dc                => 'us-east-1',
-    rack              => 'rack1',
+    rack              => 'rack1', # Dynamically injected in prod via facts
     num_tokens        => 256,
     
-    # Advanced: Use external config file managed by OmniCloud
-    config_file_mode  => '0644',
-    # We disable built-in config generation for yaml/jvm to use our files
-    manage_config_file => false,
+    # Directories (Mapped to XFS volumes)
+    data_file_directories  => ['/var/lib/cassandra/data'],
+    commitlog_directory    => '/var/lib/cassandra/commitlog',
+    saved_caches_directory => '/var/lib/cassandra/saved_caches',
+    
+    # Tuning
+    concurrent_reads       => 32,
+    concurrent_writes      => 32,
+    memtable_flush_writers => 4,
+    
+    # Config Management
+    config_file_mode   => '0644',
+    manage_config_file => false, # We use the file resource below
   }
 
-  # Direct File Management for Config (Allows UI editing to propagate)
+  # 3. Dynamic Config Injection from Git
   file { '/etc/cassandra/cassandra.yaml':
     ensure  => file,
     content => file('/opt/omnicloud/clusters/prod/conf/cassandra.yaml'),
@@ -45,7 +59,13 @@ node default {
     notify  => Class['cassandra::service'],
   }
 
-  # Ensure service is running
+  # 4. Monitoring Agent
+  if $::facts['monitoring_enabled'] == 'true' {
+      class { 'prometheus::node_exporter': }
+      class { 'cassandra::jmx_exporter': }
+  }
+
+  # 5. Service State
   class { 'cassandra::service':
     ensure => running,
     enable => true,
