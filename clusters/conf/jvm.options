@@ -1,0 +1,3 @@
+-Xms32G
+-Xmx32G
+-XX:+UseG1GC
