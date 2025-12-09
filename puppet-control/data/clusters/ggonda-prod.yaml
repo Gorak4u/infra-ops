@@ -1,0 +1,24 @@
+---
+# Cluster Config: ggonda-prod
+role: "cassandra_node"
+
+# Cassandra Profile Params
+cassandra::cluster_name: "ggonda-prod"
+cassandra::version: "4.1.3"
+cassandra::seeds: []
+
+# JVM Tuning
+cassandra::heap:
+  min: "32G"
+  max: "32G"
+
+# Advanced Tuning (Injected via Profile or direct class params)
+cassandra::settings:
+  num_tokens: 256
+  concurrent_reads: 64
+  concurrent_writes: 64
+  memtable_allocation_type: "offheap_objects"
+
+# Backup Configuration
+backup::enabled: true
+backup::schedule: "0 0 * * 0"
