@@ -9,23 +9,27 @@ cassandra::num_tokens: 256
 cassandra::partitioner: "org.apache.cassandra.dht.Murmur3Partitioner"
 cassandra::endpoint_snitch: "GossipingPropertyFileSnitch"
 
-# --- Performance Tuning (Auto-Calculated) ---
+# --- Performance Tuning (Auto-Calculated based on r5.2xlarge) ---
 cassandra::settings:
   concurrent_reads: 64
   concurrent_writes: 64
   concurrent_counter_writes: 32
   memtable_allocation_type: "offheap_objects"
-  file_cache_size_in_mb: 16384 # 25% of RAM in MB
+  file_cache_size_in_mb: 16384
   inter_dc_tcp_nodelay: true
+  trickle_fsync: true
+  trickle_fsync_interval_in_kb: 10240
 
 # --- JVM Settings ---
 cassandra::jvm_options: |
   -Xms32G
   -Xmx32G
   -XX:+UseG1GC
+  # Enterprise Tuning
   -XX:+AlwaysPreTouch
   -XX:+ResizeTLAB
   -XX:+UseNUMA
+  -XX:+PerfDisableSharedMem
 
 cassandra::heap:
   min: "32G"
